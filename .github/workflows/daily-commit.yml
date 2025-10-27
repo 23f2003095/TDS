@@ -2,9 +2,11 @@ name: Daily Commit Workflow
 
 on:
   schedule:
-    # Runs every day at 07:15 UTC (adjust as you like, but avoid * wildcards)
-    - cron: "15 7 * * *"
-  workflow_dispatch: # allows manual trigger for testing
+    - cron: "25 5 * * *"   # runs daily at 05:25 UTC (example)
+  workflow_dispatch:
+
+permissions:
+  contents: write   # 👈 this allows the bot to push commits
 
 jobs:
   daily_commit_job:
@@ -13,13 +15,14 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}   # ensures push uses correct token
 
-      # Step name must contain your email
       - name: Commit by 23f2003095@ds.study.iitm.ac.in
         run: |
           echo "Last run: $(date -u)" > last_run.txt
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add last_run.txt
-          git commit -m "Automated commit at $(date -u)"
+          git commit -m "Automated commit at $(date -u)" || echo "No changes to commit"
           git push
